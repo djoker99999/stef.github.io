@@ -1,0 +1,1009 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Collection de Cartes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('https://img.freepik.com/photos-gratuite/abeille-style-fantastique-dans-nature_23-2151176547.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ffd700, #ff6b9d, #c44569, #667eea, #ffd700);
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-box h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .boosters {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .booster {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            min-width: 200px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .booster::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .booster.bronze::before {
+            background: linear-gradient(45deg, #cd7f32, #e5a962);
+            animation: bronzeGlow 2s linear infinite;
+        }
+
+        .booster.silver::before {
+            background: linear-gradient(45deg, #c0c0c0, #e8e8e8);
+            animation: silverGlow 2s linear infinite;
+        }
+
+        .booster.gold::before {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            animation: goldGlow 2s linear infinite;
+        }
+
+        @keyframes bronzeGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes silverGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes goldGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .booster:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+
+        .booster:hover::before {
+            opacity: 1;
+        }
+
+        .booster h2 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .booster-image {
+            width: 80px;
+            height: 80px;
+            margin: 10px auto;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .booster .info {
+            opacity: 0.9;
+            margin: 10px 0;
+        }
+
+        .booster .chance {
+            color: #ffd700;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .booster button {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .booster button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #feca57, #ff6b9d);
+        }
+
+        .booster button:active {
+            transform: scale(0.98);
+        }
+
+        .quantity-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 15px 0 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .quantity-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .quantity-btn.active {
+            background: linear-gradient(45deg, #10ac84, #1dd1a1);
+            color: white;
+            border-color: #10ac84;
+            box-shadow: 0 4px 15px rgba(16, 172, 132, 0.4);
+        }
+
+        .cards-reveal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cards-reveal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .reveal-content {
+            text-align: center;
+            max-width: 95%;
+        }
+
+        .result-message {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        }
+
+        .result-message.win {
+            color: #ffd700;
+            animation: winPulse 1s ease-in-out infinite;
+        }
+
+        .result-message.lose {
+            color: #ff6b9d;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 20px #ffd700; }
+            50% { transform: scale(1.05); text-shadow: 0 0 40px #ffd700; }
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: revealCards 0.5s ease-out;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        @keyframes revealCards {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .card {
+            width: 200px;
+            height: 280px;
+            background: #1a1a2e;
+            border-radius: 15px;
+            border: 4px solid #ffd700;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            animation: cardFlip 0.6s ease-out;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(45deg, #ffd700, #ff6b9d, #c44569, #667eea, #ffd700);
+            border-radius: 17px;
+            z-index: -1;
+            animation: cardBorderGlow 3s linear infinite;
+        }
+
+        @keyframes cardBorderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes cardFlip {
+            0% {
+                transform: rotateY(180deg);
+            }
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .card.is-quad {
+            border-color: #fff;
+            animation: pulse 1s infinite, cardFlip 0.6s ease-out;
+        }
+
+        .card.is-quad::before {
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #feca57, #ffd700);
+            animation: quadGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes quadGlow {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            100% { filter: brightness(1.3) hue-rotate(20deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 50px #ffd700, 0 0 100px #ffd700;
+                transform: scale(1.05);
+            }
+        }
+
+        .card-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .close-reveal {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            color: white;
+            border: 3px solid #fff;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 1001;
+        }
+
+        .close-reveal:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            background: linear-gradient(45deg, #feca57, #ff6b9d);
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .container {
+                max-width: 95%;
+            }
+
+            .boosters {
+                gap: 15px;
+            }
+
+            .booster {
+                min-width: 180px;
+                padding: 20px;
+            }
+
+            .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 18px;
+            }
+
+            .collection-card img {
+                height: 150px;
+            }
+
+            .stat-box {
+                padding: 12px 25px;
+            }
+
+            .card {
+                width: 180px;
+                height: 252px;
+            }
+
+            .cards-container {
+                gap: 18px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: 150px;
+                height: 210px;
+            }
+
+            .result-message {
+                font-size: 2em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+
+            .collection-card img {
+                height: 140px;
+            }
+
+            .boosters {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .booster {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .stat-box {
+                padding: 10px 20px;
+            }
+
+            .stat-box .value {
+                font-size: 1.5em;
+            }
+
+            .close-reveal {
+                top: 15px;
+                right: 15px;
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        }
+
+        .collection {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+        }
+
+        .collection::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ffd700, #ff6b9d, #c44569, #667eea, #ffd700);
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        .collection h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .collection-card {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 3px solid rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .collection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-color: #ffd700;
+        }
+
+        .collection-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 5px;
+        }
+
+        .collection-card .card-label {
+            font-weight: bold;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Jeu de Collection de Cartes</h1>
+            <p class="subtitle">Obtiens un carré (4 cartes identiques) en un seul tirage</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Tentatives</h3>
+                <div class="value" id="attempts">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Carrés gagnés</h3>
+                <div class="value" id="wins">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Taux de réussite</h3>
+                <div class="value" id="winRate">0%</div>
+            </div>
+        </div>
+
+        <div class="boosters">
+            <div class="booster bronze">
+                <img src="https://i.ibb.co/7JsBRrCn/IMG-5885.png" alt="Bronze" class="booster-image">
+                <h2>🥉 Bronze</h2>
+                <div class="info">4 cartes</div>
+                <div class="chance">Chance de carré: 1%</div>
+                <div class="quantity-selector">
+                    <button class="quantity-btn active" onclick="selectQuantity(this, 'bronze', 1)">1</button>
+                    <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 5)">5</button>
+                    <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 10)">10</button>
+                    <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 30)">30</button>
+                    <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 50)">50</button>
+                    <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 100)">100</button>
+                </div>
+                <button onclick="openBooster(4, 'Bronze')">Ouvrir</button>
+            </div>
+            <div class="booster silver">
+                <img src="https://i.ibb.co/20bnDRgP/IMG-5721.png" alt="Silver" class="booster-image">
+                <h2>🥈 Silver</h2>
+                <div class="info">5 cartes</div>
+                <div class="chance">Chance de carré: 3%</div>
+                <button onclick="openBooster(5, 'Silver')">Ouvrir</button>
+            </div>
+            <div class="booster gold">
+                <img src="https://i.ibb.co/0pjVfMTt/IMG-6165.png" alt="Gold" class="booster-image">
+                <h2>🥇 Gold</h2>
+                <div class="info">7 cartes</div>
+                <div class="chance">Chance de carré: 8%</div>
+                <button onclick="openBooster(7, 'Gold')">Ouvrir</button>
+            </div>
+        </div>
+
+        <div class="collection">
+            <h2>📚 Galerie des 28 Cartes</h2>
+            <div class="collection-grid" id="collectionGrid"></div>
+        </div>
+    </div>
+
+    <div class="cards-reveal" id="cardsReveal">
+        <button class="close-reveal" onclick="closeReveal()">Fermer</button>
+        <div class="reveal-content">
+            <div class="result-message" id="resultMessage"></div>
+            <div class="cards-container" id="cardsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_CARD_TYPES = 28;
+        const cardImages = {
+            1: 'https://i.ibb.co/r2kRpBqz/IMG-6174.png',
+            2: 'https://i.ibb.co/TMdW3dZq/IMG-6173.png',
+            3: 'https://i.ibb.co/DgKGdkx4/IMG-6172.png',
+            4: 'https://i.ibb.co/k2tByVgX/IMG-6171.png',
+            5: 'https://i.ibb.co/4RJ0TCYh/IMG-6170.png',
+            6: 'https://i.ibb.co/ymyr0ws7/IMG-6169.png',
+            7: 'https://i.ibb.co/Dg4FYW5L/IMG-6168.png',
+            8: 'https://i.ibb.co/PzPSBNW0/IMG-6167.png',
+            9: 'https://i.ibb.co/F4WrT6Sb/IMG-6166.png',
+            10: 'https://i.ibb.co/0pjVfMTt/IMG-6165.png',
+            11: 'https://i.ibb.co/hRtd2JHD/IMG-6164.png',
+            12: 'https://i.ibb.co/RGbYnk5H/IMG-6163.png',
+            13: 'https://i.ibb.co/hxXnkQh7/IMG-5861.png',
+            14: 'https://i.ibb.co/kszc1xVw/IMG-5858.png',
+            15: 'https://i.ibb.co/ZRFjM91q/IMG-5895.png',
+            16: 'https://i.ibb.co/VckYwyzJ/IMG-7367.png',
+            17: 'https://i.ibb.co/VpDXp5RL/IMG-7316.png',
+            18: 'https://i.ibb.co/20Lqxy75/IMG-7315.png',
+            19: 'https://i.ibb.co/DD49PcmC/IMG-7314.png',
+            20: 'https://i.ibb.co/zhDRD41r/IMG-7313.png',
+            21: 'https://i.ibb.co/DHBNtX7t/IMG-6573.png',
+            22: 'https://i.ibb.co/dyvc8C3/IMG-6574.png',
+            23: 'https://i.ibb.co/2YpQxB1Y/IMG-6620.png',
+            24: 'https://i.ibb.co/JR5SS5vd/IMG-6570.png',
+            25: 'https://i.ibb.co/JjxRcYMW/IMG-5901.png',
+            26: 'https://i.ibb.co/qL1chxtM/IMG-5898.png',
+            27: 'https://i.ibb.co/V0zNBRgq/IMG-6834.png',
+            28: 'https://i.ibb.co/0yVG7Kty/IMG-7312.png'
+        };
+
+        // Probabilités de carré par type de booster
+        const boosterChances = {
+            bronze: 0.01,  // 1% de chance
+            silver: 0.03,  // 3% de chance
+            gold: 0.08     // 8% de chance
+        };
+
+        let attempts = 0;
+        let wins = 0;
+        let quantities = {
+            bronze: 1,
+            silver: 1,
+            gold: 1
+        };
+
+        function selectQuantity(btn, boosterType, quantity) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.quantity-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            quantities[boosterType] = quantity;
+        }
+
+        function drawCards(count, boosterType) {
+            const cards = [];
+            const quadChance = boosterChances[boosterType];
+            
+            // Vérifier si on doit forcer un carré selon la probabilité du booster
+            const forceQuad = Math.random() < quadChance;
+            
+            if (forceQuad) {
+                // Forcer un carré (4 cartes identiques)
+                const quadCard = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
+                
+                // Ajouter 4 cartes identiques
+                for (let i = 0; i < 4; i++) {
+                    cards.push(quadCard);
+                }
+                
+                // Ajouter le reste des cartes aléatoirement
+                for (let i = 4; i < count; i++) {
+                    const cardNum = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
+                    cards.push(cardNum);
+                }
+                
+                // Mélanger les cartes
+                return shuffleArray(cards);
+            } else {
+                // Tirage normal
+                for (let i = 0; i < count; i++) {
+                    const cardNum = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
+                    cards.push(cardNum);
+                }
+                return cards;
+            }
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function checkForQuad(cards) {
+            const cardCounts = {};
+            cards.forEach(card => {
+                cardCounts[card] = (cardCounts[card] || 0) + 1;
+            });
+            
+            for (const [card, count] of Object.entries(cardCounts)) {
+                if (count >= 4) {
+                    return parseInt(card);
+                }
+            }
+            return null;
+        }
+
+        function openBooster(cardCount, boosterName) {
+            const boosterType = boosterName.toLowerCase();
+            const quantity = quantities[boosterType] || 1;
+            
+            if (quantity === 1) {
+                // Tirage simple - affiche les cartes
+                attempts++;
+                const cards = drawCards(cardCount, boosterType);
+                const quadCard = checkForQuad(cards);
+                
+                if (quadCard) {
+                    wins++;
+                }
+                
+                updateStats();
+                displaySingleDraw(cards, quadCard, boosterName);
+            } else {
+                // Tirages multiples - affiche tous les tirages
+                let totalWins = 0;
+                let allDraws = [];
+                
+                for (let i = 0; i < quantity; i++) {
+                    attempts++;
+                    const cards = drawCards(cardCount, boosterType);
+                    const quadCard = checkForQuad(cards);
+                    
+                    if (quadCard) {
+                        wins++;
+                        totalWins++;
+                    }
+                    
+                    allDraws.push({ cards, quadCard });
+                }
+                
+                updateStats();
+                displayMultipleDraws(quantity, totalWins, allDraws, boosterName);
+            }
+        }
+
+        function displaySingleDraw(cards, quadCard, boosterName) {
+            const container = document.getElementById('cardsContainer');
+            const resultMessage = document.getElementById('resultMessage');
+            container.innerHTML = '';
+
+            if (quadCard) {
+                resultMessage.textContent = `CARRÉ GAGNÉ !`;
+                resultMessage.className = 'result-message win';
+            } else {
+                resultMessage.textContent = `Pas de carré cette fois...`;
+                resultMessage.className = 'result-message lose';
+            }
+
+            const cardCounts = {};
+            cards.forEach(card => {
+                cardCounts[card] = (cardCounts[card] || 0) + 1;
+            });
+
+            cards.forEach((cardNum, index) => {
+                setTimeout(() => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card';
+                    if (quadCard === cardNum) {
+                        cardDiv.classList.add('is-quad');
+                    }
+                    
+                    cardDiv.innerHTML = `
+                        <img src="${cardImages[cardNum]}" alt="Carte ${cardNum}">
+                        <div class="card-count">${cardCounts[cardNum]}x</div>
+                    `;
+                    container.appendChild(cardDiv);
+                }, index * 100);
+            });
+
+            document.getElementById('cardsReveal').classList.add('active');
+        }
+
+        function displayMultipleDraws(quantity, totalWins, allDraws, boosterName) {
+            const container = document.getElementById('cardsContainer');
+            const resultMessage = document.getElementById('resultMessage');
+            container.innerHTML = '';
+
+            if (totalWins > 0) {
+                resultMessage.textContent = `🎉 ${totalWins} CARRÉ${totalWins > 1 ? 'S' : ''} sur ${quantity} tirages !`;
+                resultMessage.className = 'result-message win';
+            } else {
+                resultMessage.textContent = `Pas de carré sur ${quantity} tirages...`;
+                resultMessage.className = 'result-message lose';
+            }
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.cssText = `
+                background: rgba(0, 0, 0, 0.7);
+                padding: 20px 30px;
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 215, 0, 0.3);
+                font-size: 1.2em;
+                line-height: 1.8;
+                max-width: 800px;
+                margin: 0 auto 30px auto;
+                display: flex;
+                gap: 30px;
+                justify-content: center;
+                flex-wrap: wrap;
+            `;
+            
+            summaryDiv.innerHTML = `
+                <div style="color: #10ac84;">
+                    ✅ Carrés: <strong>${totalWins}</strong>
+                </div>
+                <div style="color: #ff6b9d;">
+                    ❌ Échecs: <strong>${quantity - totalWins}</strong>
+                </div>
+                <div style="color: #ffd700;">
+                    📈 Réussite: <strong>${((totalWins / quantity) * 100).toFixed(1)}%</strong>
+                </div>
+            `;
+            
+            container.appendChild(summaryDiv);
+
+            // Affichage de tous les tirages
+            const allDrawsContainer = document.createElement('div');
+            allDrawsContainer.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+                margin-top: 20px;
+            `;
+
+            allDraws.forEach((draw, drawIndex) => {
+                setTimeout(() => {
+                    const drawDiv = document.createElement('div');
+                    drawDiv.style.cssText = `
+                        background: rgba(0, 0, 0, 0.6);
+                        padding: 20px;
+                        border-radius: 15px;
+                        border: 2px solid ${draw.quadCard ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'};
+                        backdrop-filter: blur(5px);
+                    `;
+
+                    const drawTitle = document.createElement('div');
+                    drawTitle.style.cssText = `
+                        font-size: 1.3em;
+                        font-weight: bold;
+                        margin-bottom: 15px;
+                        color: ${draw.quadCard ? '#ffd700' : '#fff'};
+                        text-align: center;
+                    `;
+                    drawTitle.textContent = draw.quadCard ? `🏆 Tirage #${drawIndex + 1} - CARRÉ !` : `Tirage #${drawIndex + 1}`;
+                    drawDiv.appendChild(drawTitle);
+
+                    const cardsRow = document.createElement('div');
+                    cardsRow.style.cssText = `
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    `;
+
+                    const cardCounts = {};
+                    draw.cards.forEach(card => {
+                        cardCounts[card] = (cardCounts[card] || 0) + 1;
+                    });
+
+                    draw.cards.forEach((cardNum, cardIndex) => {
+                        setTimeout(() => {
+                            const cardDiv = document.createElement('div');
+                            cardDiv.className = 'card';
+                            if (draw.quadCard === cardNum) {
+                                cardDiv.classList.add('is-quad');
+                            }
+                            
+                            cardDiv.innerHTML = `
+                                <img src="${cardImages[cardNum]}" alt="Carte ${cardNum}">
+                                <div class="card-count">${cardCounts[cardNum]}x</div>
+                            `;
+                            cardsRow.appendChild(cardDiv);
+                        }, cardIndex * 50);
+                    });
+
+                    drawDiv.appendChild(cardsRow);
+                    allDrawsContainer.appendChild(drawDiv);
+                }, drawIndex * 200);
+            });
+
+            container.appendChild(allDrawsContainer);
+            document.getElementById('cardsReveal').classList.add('active');
+        }
+
+        function closeReveal() {
+            document.getElementById('cardsReveal').classList.remove('active');
+        }
+
+        function updateStats() {
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('wins').textContent = wins;
+            const winRate = attempts > 0 ? ((wins / attempts) * 100).toFixed(1) : 0;
+            document.getElementById('winRate').textContent = winRate + '%';
+        }
+
+        function displayAllCards() {
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= TOTAL_CARD_TYPES; i++) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'collection-card';
+                
+                cardDiv.innerHTML = `
+                    <img src="${cardImages[i]}" alt="Carte ${i}">
+                    <div class="card-label">Carte ${i}</div>
+                `;
+                
+                grid.appendChild(cardDiv);
+            }
+        }
+
+        updateStats();
+        displayAllCards();
+    </script>
+</body>
+</html>
