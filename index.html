@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Collection de Cartes</title>
+    <title>Jeu de Collection de Cartes - Version Difficile</title>
     <style>
         * {
             margin: 0;
@@ -196,12 +195,6 @@
         .booster .info {
             opacity: 0.9;
             margin: 10px 0;
-        }
-
-        .booster .chance {
-            color: #ffd700;
-            font-weight: bold;
-            margin: 5px 0;
         }
 
         .booster button {
@@ -632,7 +625,6 @@
                 <img src="https://i.ibb.co/7JsBRrCn/IMG-5885.png" alt="Bronze" class="booster-image">
                 <h2>🥉 Bronze</h2>
                 <div class="info">4 cartes</div>
-                <div class="chance">Chance de carré: 1%</div>
                 <div class="quantity-selector">
                     <button class="quantity-btn active" onclick="selectQuantity(this, 'bronze', 1)">1</button>
                     <button class="quantity-btn" onclick="selectQuantity(this, 'bronze', 5)">5</button>
@@ -647,20 +639,18 @@
                 <img src="https://i.ibb.co/20bnDRgP/IMG-5721.png" alt="Silver" class="booster-image">
                 <h2>🥈 Silver</h2>
                 <div class="info">5 cartes</div>
-                <div class="chance">Chance de carré: 3%</div>
                 <button onclick="openBooster(5, 'Silver')">Ouvrir</button>
             </div>
             <div class="booster gold">
                 <img src="https://i.ibb.co/0pjVfMTt/IMG-6165.png" alt="Gold" class="booster-image">
                 <h2>🥇 Gold</h2>
                 <div class="info">7 cartes</div>
-                <div class="chance">Chance de carré: 8%</div>
                 <button onclick="openBooster(7, 'Gold')">Ouvrir</button>
             </div>
         </div>
 
         <div class="collection">
-            <h2>📚 Galerie des 28 Cartes</h2>
+            <h2>📚 Galerie des 21 Cartes</h2>
             <div class="collection-grid" id="collectionGrid"></div>
         </div>
     </div>
@@ -674,7 +664,7 @@
     </div>
 
     <script>
-        const TOTAL_CARD_TYPES = 28;
+        const TOTAL_CARD_TYPES = 21; // Modifié de 28 à 21
         const cardImages = {
             1: 'https://i.ibb.co/r2kRpBqz/IMG-6174.png',
             2: 'https://i.ibb.co/TMdW3dZq/IMG-6173.png',
@@ -687,30 +677,28 @@
             9: 'https://i.ibb.co/F4WrT6Sb/IMG-6166.png',
             10: 'https://i.ibb.co/0pjVfMTt/IMG-6165.png',
             11: 'https://i.ibb.co/hRtd2JHD/IMG-6164.png',
-            12: 'https://i.ibb.co/RGbYnk5H/IMG-6163.png',
+            // Supprimé la carte 12
             13: 'https://i.ibb.co/hxXnkQh7/IMG-5861.png',
             14: 'https://i.ibb.co/kszc1xVw/IMG-5858.png',
             15: 'https://i.ibb.co/ZRFjM91q/IMG-5895.png',
-            16: 'https://i.ibb.co/VckYwyzJ/IMG-7367.png',
-            17: 'https://i.ibb.co/VpDXp5RL/IMG-7316.png',
+            // Supprimé les cartes 16, 17
             18: 'https://i.ibb.co/20Lqxy75/IMG-7315.png',
             19: 'https://i.ibb.co/DD49PcmC/IMG-7314.png',
-            20: 'https://i.ibb.co/zhDRD41r/IMG-7313.png',
-            21: 'https://i.ibb.co/DHBNtX7t/IMG-6573.png',
-            22: 'https://i.ibb.co/dyvc8C3/IMG-6574.png',
+            // Supprimé la carte 20
+            // Supprimé les cartes 21, 22
             23: 'https://i.ibb.co/2YpQxB1Y/IMG-6620.png',
-            24: 'https://i.ibb.co/JR5SS5vd/IMG-6570.png',
+            // Supprimé la carte 24
             25: 'https://i.ibb.co/JjxRcYMW/IMG-5901.png',
             26: 'https://i.ibb.co/qL1chxtM/IMG-5898.png',
             27: 'https://i.ibb.co/V0zNBRgq/IMG-6834.png',
             28: 'https://i.ibb.co/0yVG7Kty/IMG-7312.png'
         };
 
-        // Probabilités de carré par type de booster
+        // Probabilités de carré par type de booster (environ 1 chance sur 1 million)
         const boosterChances = {
-            bronze: 0.01,  // 1% de chance
-            silver: 0.03,  // 3% de chance
-            gold: 0.08     // 8% de chance
+            bronze: 0.000001,  // 0.0001% de chance (1 sur 1 million)
+            silver: 0.000005,  // 0.0005% de chance
+            gold: 0.00001      // 0.001% de chance
         };
 
         let attempts = 0;
@@ -753,11 +741,20 @@
                 // Mélanger les cartes
                 return shuffleArray(cards);
             } else {
-                // Tirage normal
+                // Tirage normal - très peu de chance d'obtenir un carré naturellement
                 for (let i = 0; i < count; i++) {
                     const cardNum = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
                     cards.push(cardNum);
                 }
+                
+                // Vérifier si on a accidentellement obtenu un carré
+                const hasQuad = checkForQuad(cards);
+                
+                // Si on a un carré par accident, on refait le tirage pour éviter cela
+                if (hasQuad) {
+                    return drawCards(count, boosterType);
+                }
+                
                 return cards;
             }
         }
@@ -899,7 +896,7 @@
                     ❌ Échecs: <strong>${quantity - totalWins}</strong>
                 </div>
                 <div style="color: #ffd700;">
-                    📈 Réussite: <strong>${((totalWins / quantity) * 100).toFixed(1)}%</strong>
+                    📈 Réussite: <strong>${((totalWins / quantity) * 100).toFixed(6)}%</strong>
                 </div>
             `;
             
@@ -981,7 +978,7 @@
         function updateStats() {
             document.getElementById('attempts').textContent = attempts;
             document.getElementById('wins').textContent = wins;
-            const winRate = attempts > 0 ? ((wins / attempts) * 100).toFixed(1) : 0;
+            const winRate = attempts > 0 ? ((wins / attempts) * 100).toFixed(6) : 0;
             document.getElementById('winRate').textContent = winRate + '%';
         }
 
