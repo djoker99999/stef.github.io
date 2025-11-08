@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Collection de Cartes - Version Difficile</title>
+    <title>Jeu de Collection de Cartes - Version Modifiée</title>
     <style>
         * {
             margin: 0;
@@ -13,12 +13,12 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('https://img.freepik.com/photos-gratuite/abeille-style-fantastique-dans-nature_23-2151176547.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed;
-            background-size: cover;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             min-height: 100vh;
             padding: 20px;
             color: #fff;
             position: relative;
+            overflow-x: hidden;
         }
 
         body::before {
@@ -190,6 +190,8 @@
             margin: 10px auto;
             border-radius: 10px;
             object-fit: contain;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
         }
 
         .booster .info {
@@ -677,21 +679,16 @@
             9: 'https://i.ibb.co/F4WrT6Sb/IMG-6166.png',
             10: 'https://i.ibb.co/0pjVfMTt/IMG-6165.png',
             11: 'https://i.ibb.co/hRtd2JHD/IMG-6164.png',
-            // Supprimé la carte 12
-            13: 'https://i.ibb.co/hxXnkQh7/IMG-5861.png',
-            14: 'https://i.ibb.co/kszc1xVw/IMG-5858.png',
-            15: 'https://i.ibb.co/ZRFjM91q/IMG-5895.png',
-            // Supprimé les cartes 16, 17
-            18: 'https://i.ibb.co/20Lqxy75/IMG-7315.png',
-            19: 'https://i.ibb.co/DD49PcmC/IMG-7314.png',
-            // Supprimé la carte 20
-            // Supprimé les cartes 21, 22
-            23: 'https://i.ibb.co/2YpQxB1Y/IMG-6620.png',
-            // Supprimé la carte 24
-            25: 'https://i.ibb.co/JjxRcYMW/IMG-5901.png',
-            26: 'https://i.ibb.co/qL1chxtM/IMG-5898.png',
-            27: 'https://i.ibb.co/V0zNBRgq/IMG-6834.png',
-            28: 'https://i.ibb.co/0yVG7Kty/IMG-7312.png'
+            12: 'https://i.ibb.co/hxXnkQh7/IMG-5861.png',
+            13: 'https://i.ibb.co/kszc1xVw/IMG-5858.png',
+            14: 'https://i.ibb.co/ZRFjM91q/IMG-5895.png',
+            15: 'https://i.ibb.co/20Lqxy75/IMG-7315.png',
+            16: 'https://i.ibb.co/DD49PcmC/IMG-7314.png',
+            17: 'https://i.ibb.co/2YpQxB1Y/IMG-6620.png',
+            18: 'https://i.ibb.co/JjxRcYMW/IMG-5901.png',
+            19: 'https://i.ibb.co/qL1chxtM/IMG-5898.png',
+            20: 'https://i.ibb.co/V0zNBRgq/IMG-6834.png',
+            21: 'https://i.ibb.co/0yVG7Kty/IMG-7312.png'
         };
 
         // Probabilités de carré par type de booster (environ 1 chance sur 1 million)
