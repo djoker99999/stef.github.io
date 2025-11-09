@@ -106,6 +106,31 @@
             font-weight: bold;
         }
 
+        /* NOUVEAU : Affichage du pool de drop */
+        .drop-pool-display {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .drop-pool-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .drop-pool-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #feca57;
+        }
+
         .boosters {
             display: flex;
             justify-content: center;
@@ -445,6 +470,102 @@
             background: linear-gradient(45deg, #feca57, #ff6b9d);
         }
 
+        /* NOUVEAU : Animation de drop */
+        .drop-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            animation: dropFadeIn 0.5s ease;
+        }
+
+        @keyframes dropFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .drop-popup {
+            background: linear-gradient(135deg, #f39c12, #e67e22, #f39c12);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: dropScaleIn 0.6s ease;
+            border: 4px solid #feca57;
+            box-shadow: 0 0 40px rgba(243, 156, 18, 0.8);
+            position: relative;
+            overflow: hidden;
+            z-index: 10000;
+        }
+
+        @keyframes dropScaleIn {
+            from { 
+                transform: scale(0.2) rotate(-5deg);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .drop-popup-icon {
+            font-size: 6em;
+            margin-bottom: 15px;
+            animation: dropBounce 0.8s infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+        }
+
+        @keyframes dropBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
+        .drop-popup-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 0 15px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .drop-popup-description {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .drop-close {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10001;
+        }
+
+        .drop-close:hover {
+            background: linear-gradient(45deg, #e67e22, #f39c12);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
         @media (max-width: 1024px) and (min-width: 769px) {
             .container {
                 max-width: 95%;
@@ -620,6 +741,12 @@
                 <h3>Taux de réussite</h3>
                 <div class="value" id="winRate">0%</div>
             </div>
+            <!-- NOUVEAU : Affichage du pool de drop -->
+            <div class="drop-pool-display">
+                <h3>POOL DE DROP</h3>
+                <div class="drop-pool-value" id="dropPoolValue">0 pièces</div>
+                <div class="drop-pool-info" id="dropPoolInfo">Chance de 1/5000 de gagner des pièces</div>
+            </div>
         </div>
 
         <div class="boosters">
@@ -698,6 +825,10 @@
             gold: 0.00001      // 0.001% de chance
         };
 
+        // NOUVEAU : Variables pour le système de drop
+        let dropPool = 0; // Nombre de pièces dans le pool de drop
+        let dropCounter = 0; // Compteur pour ajouter des pièces au pool tous les 10 tours
+
         let attempts = 0;
         let wins = 0;
         let quantities = {
@@ -705,6 +836,75 @@
             silver: 1,
             gold: 1
         };
+
+        // NOUVEAU : Fonction pour mettre à jour l'affichage du pool de drop
+        function updateDropPoolDisplay() {
+            document.getElementById('dropPoolValue').textContent = `${dropPool} pièces`;
+            
+            if (dropPool > 0) {
+                document.getElementById('dropPoolInfo').textContent = `Chance de 1/5000 de gagner ${dropPool} pièces`;
+            } else {
+                document.getElementById('dropPoolInfo').textContent = `Chance de 1/5000 de gagner des pièces`;
+            }
+        }
+
+        // NOUVEAU : Fonction pour gérer le système de drop
+        function handleDropSystem() {
+            // Incrémenter le compteur de drop
+            dropCounter++;
+            
+            // Ajouter 1 pièce au pool tous les 10 tours
+            if (dropCounter % 10 === 0) {
+                dropPool += 1;
+                updateDropPoolDisplay();
+            }
+            
+            // Chance de 1 sur 5000 de gagner les pièces du pool
+            if (dropPool > 0 && Math.random() < 1/5000) {
+                const coinsWon = dropPool;
+                
+                // Afficher l'animation de drop
+                showDropAnimation(coinsWon);
+                
+                // Réinitialiser le pool
+                dropPool = 0;
+                updateDropPoolDisplay();
+                
+                return true;
+            }
+            
+            return false;
+        }
+
+        // NOUVEAU : Fonction pour afficher l'animation de drop
+        function showDropAnimation(coinsWon) {
+            const dropAnimation = document.createElement('div');
+            dropAnimation.className = 'drop-animation';
+            
+            dropAnimation.innerHTML = `
+                <div class="drop-popup">
+                    <div class="drop-popup-icon">
+                        <img src="https://i.ibb.co/7JsBRrCn/IMG-5885.png" alt="Pièces" style="width: 80px; height: 80px;">
+                    </div>
+                    <div class="drop-popup-title">DROP GAGNÉ !</div>
+                    <div class="drop-popup-description">Vous avez remporté ${coinsWon} pièces du pool de drop !</div>
+                    <button class="drop-close">CONTINUER</button>
+                </div>
+            `;
+            
+            document.body.appendChild(dropAnimation);
+            
+            const closeButton = dropAnimation.querySelector('.drop-close');
+            closeButton.addEventListener('click', () => {
+                document.body.removeChild(dropAnimation);
+            });
+            
+            setTimeout(() => {
+                if (document.body.contains(dropAnimation)) {
+                    document.body.removeChild(dropAnimation);
+                }
+            }, 5000);
+        }
 
         function selectQuantity(btn, boosterType, quantity) {
             const parent = btn.parentElement;
@@ -786,6 +986,10 @@
             if (quantity === 1) {
                 // Tirage simple - affiche les cartes
                 attempts++;
+                
+                // NOUVEAU : Gérer le système de drop
+                const dropWon = handleDropSystem();
+                
                 const cards = drawCards(cardCount, boosterType);
                 const quadCard = checkForQuad(cards);
                 
@@ -794,14 +998,22 @@
                 }
                 
                 updateStats();
-                displaySingleDraw(cards, quadCard, boosterName);
+                // NOUVEAU : Passer l'information du drop à l'affichage
+                displaySingleDraw(cards, quadCard, boosterName, dropWon);
             } else {
                 // Tirages multiples - affiche tous les tirages
                 let totalWins = 0;
                 let allDraws = [];
+                let dropWon = false;
                 
                 for (let i = 0; i < quantity; i++) {
                     attempts++;
+                    
+                    // NOUVEAU : Gérer le système de drop (seulement une fois par lot de tirages)
+                    if (!dropWon) {
+                        dropWon = handleDropSystem();
+                    }
+                    
                     const cards = drawCards(cardCount, boosterType);
                     const quadCard = checkForQuad(cards);
                     
@@ -814,17 +1026,21 @@
                 }
                 
                 updateStats();
-                displayMultipleDraws(quantity, totalWins, allDraws, boosterName);
+                // NOUVEAU : Passer l'information du drop à l'affichage
+                displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon);
             }
         }
 
-        function displaySingleDraw(cards, quadCard, boosterName) {
+        function displaySingleDraw(cards, quadCard, boosterName, dropWon) {
             const container = document.getElementById('cardsContainer');
             const resultMessage = document.getElementById('resultMessage');
             container.innerHTML = '';
 
             if (quadCard) {
                 resultMessage.textContent = `CARRÉ GAGNÉ !`;
+                resultMessage.className = 'result-message win';
+            } else if (dropWon) {
+                resultMessage.textContent = `DROP GAGNÉ !`;
                 resultMessage.className = 'result-message win';
             } else {
                 resultMessage.textContent = `Pas de carré cette fois...`;
@@ -855,13 +1071,16 @@
             document.getElementById('cardsReveal').classList.add('active');
         }
 
-        function displayMultipleDraws(quantity, totalWins, allDraws, boosterName) {
+        function displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon) {
             const container = document.getElementById('cardsContainer');
             const resultMessage = document.getElementById('resultMessage');
             container.innerHTML = '';
 
             if (totalWins > 0) {
                 resultMessage.textContent = `🎉 ${totalWins} CARRÉ${totalWins > 1 ? 'S' : ''} sur ${quantity} tirages !`;
+                resultMessage.className = 'result-message win';
+            } else if (dropWon) {
+                resultMessage.textContent = `DROP GAGNÉ sur ${quantity} tirages !`;
                 resultMessage.className = 'result-message win';
             } else {
                 resultMessage.textContent = `Pas de carré sur ${quantity} tirages...`;
@@ -895,6 +1114,7 @@
                 <div style="color: #ffd700;">
                     📈 Réussite: <strong>${((totalWins / quantity) * 100).toFixed(6)}%</strong>
                 </div>
+                ${dropWon ? '<div style="color: #f39c12;">💰 DROP: <strong>GAGNÉ</strong></div>' : ''}
             `;
             
             container.appendChild(summaryDiv);
@@ -996,6 +1216,8 @@
             }
         }
 
+        // Initialiser l'affichage du pool de drop
+        updateDropPoolDisplay();
         updateStats();
         displayAllCards();
     </script>
