@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Collection de Cartes - Version Modifiée</title>
+    <title>Jeu de Collection de Cartes - Version Améliorée</title>
     <style>
         * {
             margin: 0;
@@ -106,7 +106,7 @@
             font-weight: bold;
         }
 
-        /* NOUVEAU : Affichage du pool de drop */
+        /* Affichage du pool de drop */
         .drop-pool-display {
             background: linear-gradient(45deg, #f39c12, #e67e22);
             padding: 15px 30px;
@@ -470,7 +470,7 @@
             background: linear-gradient(45deg, #feca57, #ff6b9d);
         }
 
-        /* NOUVEAU : Animation de drop */
+        /* Animation de drop */
         .drop-animation {
             position: fixed;
             top: 0;
@@ -566,6 +566,120 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
+        /* Panneau de triche */
+        .cheat-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 215, 0, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            width: 300px;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .cheat-panel:hover {
+            border-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .cheat-panel h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .cheat-card-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .cheat-card-option {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .cheat-card-option:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .cheat-card-option.selected {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+
+        .cheat-card-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+        }
+
+        .cheat-info {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .cheat-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #10ac84, #1dd1a1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cheat-button:hover {
+            background: linear-gradient(45deg, #1dd1a1, #10ac84);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 172, 132, 0.4);
+        }
+
+        .cheat-button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cheat-counter {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #feca57;
+        }
+
         @media (max-width: 1024px) and (min-width: 769px) {
             .container {
                 max-width: 95%;
@@ -601,6 +715,10 @@
             .cards-container {
                 gap: 18px;
                 padding: 15px;
+            }
+
+            .cheat-panel {
+                width: 280px;
             }
         }
 
@@ -650,6 +768,12 @@
                 right: 15px;
                 padding: 10px 20px;
                 font-size: 1em;
+            }
+
+            .cheat-panel {
+                width: 250px;
+                right: 10px;
+                top: 80px;
             }
         }
 
@@ -741,7 +865,7 @@
                 <h3>Taux de réussite</h3>
                 <div class="value" id="winRate">0%</div>
             </div>
-            <!-- NOUVEAU : Affichage du pool de drop -->
+            <!-- Affichage du pool de drop -->
             <div class="drop-pool-display">
                 <h3>POOL DE DROP</h3>
                 <div class="drop-pool-value" id="dropPoolValue">0 pièces</div>
@@ -792,8 +916,19 @@
         </div>
     </div>
 
+    <!-- Panneau de triche -->
+    <div class="cheat-panel" id="cheatPanel">
+        <h3>🎴 Triche - Drop après 100 tours</h3>
+        <div class="cheat-info">
+            Choisissez une carte qui sera garantie après 100 tours
+        </div>
+        <div class="cheat-card-selection" id="cheatCardSelection"></div>
+        <button class="cheat-button" id="cheatButton" onclick="activateCheat()" disabled>Activer la triche</button>
+        <div class="cheat-counter" id="cheatCounter">Tours restants: 100</div>
+    </div>
+
     <script>
-        const TOTAL_CARD_TYPES = 21; // Modifié de 28 à 21
+        const TOTAL_CARD_TYPES = 21;
         const cardImages = {
             1: 'https://i.ibb.co/r2kRpBqz/IMG-6174.png',
             2: 'https://i.ibb.co/TMdW3dZq/IMG-6173.png',
@@ -825,9 +960,14 @@
             gold: 0.00001      // 0.001% de chance
         };
 
-        // NOUVEAU : Variables pour le système de drop
+        // Variables pour le système de drop
         let dropPool = 0; // Nombre de pièces dans le pool de drop
         let dropCounter = 0; // Compteur pour ajouter des pièces au pool tous les 10 tours
+
+        // Variables pour le système de triche
+        let cheatCard = null; // Carte sélectionnée pour la triche
+        let cheatCounter = 100; // Nombre de tours restants avant activation
+        let cheatActive = false; // Indique si la triche est active
 
         let attempts = 0;
         let wins = 0;
@@ -837,7 +977,7 @@
             gold: 1
         };
 
-        // NOUVEAU : Fonction pour mettre à jour l'affichage du pool de drop
+        // Fonction pour mettre à jour l'affichage du pool de drop
         function updateDropPoolDisplay() {
             document.getElementById('dropPoolValue').textContent = `${dropPool} pièces`;
             
@@ -848,7 +988,7 @@
             }
         }
 
-        // NOUVEAU : Fonction pour gérer le système de drop
+        // Fonction pour gérer le système de drop
         function handleDropSystem() {
             // Incrémenter le compteur de drop
             dropCounter++;
@@ -876,7 +1016,7 @@
             return false;
         }
 
-        // NOUVEAU : Fonction pour afficher l'animation de drop
+        // Fonction pour afficher l'animation de drop
         function showDropAnimation(coinsWon) {
             const dropAnimation = document.createElement('div');
             dropAnimation.className = 'drop-animation';
@@ -906,6 +1046,122 @@
             }, 5000);
         }
 
+        // Fonction pour initialiser le panneau de triche
+        function initCheatPanel() {
+            const cheatCardSelection = document.getElementById('cheatCardSelection');
+            
+            // Créer les options de carte pour la triche
+            for (let i = 1; i <= TOTAL_CARD_TYPES; i++) {
+                const cardOption = document.createElement('div');
+                cardOption.className = 'cheat-card-option';
+                cardOption.dataset.cardId = i;
+                
+                cardOption.innerHTML = `
+                    <img src="${cardImages[i]}" alt="Carte ${i}">
+                `;
+                
+                cardOption.addEventListener('click', () => {
+                    // Désélectionner toutes les autres options
+                    document.querySelectorAll('.cheat-card-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    
+                    // Sélectionner cette option
+                    cardOption.classList.add('selected');
+                    cheatCard = i;
+                    
+                    // Activer le bouton
+                    document.getElementById('cheatButton').disabled = false;
+                });
+                
+                cheatCardSelection.appendChild(cardOption);
+            }
+            
+            // Rendre le panneau déplaçable
+            makeDraggable(document.getElementById('cheatPanel'));
+        }
+
+        // Fonction pour rendre un élément déplaçable
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            element.onmousedown = dragMouseDown;
+            
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Obtenir la position du curseur au début
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // Appeler une fonction chaque fois que le curseur bouge
+                document.onmousemove = elementDrag;
+            }
+            
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Calculer la nouvelle position
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // Définir la nouvelle position de l'élément
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            
+            function closeDragElement() {
+                // Arrêter le déplacement lorsque le bouton de la souris est relâché
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // Fonction pour activer la triche
+        function activateCheat() {
+            if (cheatCard) {
+                cheatActive = true;
+                document.getElementById('cheatButton').disabled = true;
+                document.getElementById('cheatButton').textContent = 'Triche activée';
+                document.getElementById('cheatButton').style.background = 'linear-gradient(45deg, #f39c12, #e67e22)';
+                
+                // Afficher un message de confirmation
+                alert(`Triche activée ! Vous obtiendrez la carte ${cheatCard} après ${cheatCounter} tours.`);
+            }
+        }
+
+        // Fonction pour gérer le système de triche
+        function handleCheatSystem() {
+            if (cheatActive && cheatCounter > 0) {
+                cheatCounter--;
+                document.getElementById('cheatCounter').textContent = `Tours restants: ${cheatCounter}`;
+                
+                // Si le compteur atteint 0, activer la triche
+                if (cheatCounter === 0) {
+                    // Forcer la carte sélectionnée dans le prochain tirage
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Fonction pour réinitialiser la triche
+        function resetCheat() {
+            cheatActive = false;
+            cheatCounter = 100;
+            cheatCard = null;
+            document.getElementById('cheatButton').disabled = true;
+            document.getElementById('cheatButton').textContent = 'Activer la triche';
+            document.getElementById('cheatButton').style.background = 'linear-gradient(45deg, #10ac84, #1dd1a1)';
+            document.getElementById('cheatCounter').textContent = 'Tours restants: 100';
+            
+            // Désélectionner toutes les cartes
+            document.querySelectorAll('.cheat-card-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+
         function selectQuantity(btn, boosterType, quantity) {
             const parent = btn.parentElement;
             parent.querySelectorAll('.quantity-btn').forEach(b => b.classList.remove('active'));
@@ -919,6 +1175,9 @@
             
             // Vérifier si on doit forcer un carré selon la probabilité du booster
             const forceQuad = Math.random() < quadChance;
+            
+            // Vérifier si la triche doit s'activer
+            const cheatTriggered = handleCheatSystem();
             
             if (forceQuad) {
                 // Forcer un carré (4 cartes identiques)
@@ -937,6 +1196,23 @@
                 
                 // Mélanger les cartes
                 return shuffleArray(cards);
+            } else if (cheatTriggered && cheatCard) {
+                // La triche s'active - garantir la carte sélectionnée
+                cards.push(cheatCard);
+                
+                // Ajouter le reste des cartes aléatoirement
+                for (let i = 1; i < count; i++) {
+                    const cardNum = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
+                    cards.push(cardNum);
+                }
+                
+                // Afficher un message de triche
+                showCheatAnimation(cheatCard);
+                
+                // Réinitialiser la triche
+                resetCheat();
+                
+                return shuffleArray(cards);
             } else {
                 // Tirage normal - très peu de chance d'obtenir un carré naturellement
                 for (let i = 0; i < count; i++) {
@@ -954,6 +1230,36 @@
                 
                 return cards;
             }
+        }
+
+        // Fonction pour afficher l'animation de triche
+        function showCheatAnimation(cardId) {
+            const cheatAnimation = document.createElement('div');
+            cheatAnimation.className = 'drop-animation';
+            
+            cheatAnimation.innerHTML = `
+                <div class="drop-popup">
+                    <div class="drop-popup-icon">
+                        <img src="${cardImages[cardId]}" alt="Carte ${cardId}" style="width: 80px; height: 80px;">
+                    </div>
+                    <div class="drop-popup-title">TRICHE ACTIVÉE !</div>
+                    <div class="drop-popup-description">Vous avez obtenu la carte ${cardId} grâce à la triche !</div>
+                    <button class="drop-close">CONTINUER</button>
+                </div>
+            `;
+            
+            document.body.appendChild(cheatAnimation);
+            
+            const closeButton = cheatAnimation.querySelector('.drop-close');
+            closeButton.addEventListener('click', () => {
+                document.body.removeChild(cheatAnimation);
+            });
+            
+            setTimeout(() => {
+                if (document.body.contains(cheatAnimation)) {
+                    document.body.removeChild(cheatAnimation);
+                }
+            }, 5000);
         }
 
         function shuffleArray(array) {
@@ -987,7 +1293,7 @@
                 // Tirage simple - affiche les cartes
                 attempts++;
                 
-                // NOUVEAU : Gérer le système de drop
+                // Gérer le système de drop
                 const dropWon = handleDropSystem();
                 
                 const cards = drawCards(cardCount, boosterType);
@@ -998,7 +1304,7 @@
                 }
                 
                 updateStats();
-                // NOUVEAU : Passer l'information du drop à l'affichage
+                // Passer l'information du drop à l'affichage
                 displaySingleDraw(cards, quadCard, boosterName, dropWon);
             } else {
                 // Tirages multiples - affiche tous les tirages
@@ -1009,7 +1315,7 @@
                 for (let i = 0; i < quantity; i++) {
                     attempts++;
                     
-                    // NOUVEAU : Gérer le système de drop (seulement une fois par lot de tirages)
+                    // Gérer le système de drop (seulement une fois par lot de tirages)
                     if (!dropWon) {
                         dropWon = handleDropSystem();
                     }
@@ -1026,7 +1332,7 @@
                 }
                 
                 updateStats();
-                // NOUVEAU : Passer l'information du drop à l'affichage
+                // Passer l'information du drop à l'affichage
                 displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon);
             }
         }
@@ -1220,6 +1526,7 @@
         updateDropPoolDisplay();
         updateStats();
         displayAllCards();
+        initCheatPanel();
     </script>
 </body>
 </html>
