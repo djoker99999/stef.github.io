@@ -1126,8 +1126,8 @@
                 document.getElementById('cheatButton').textContent = 'Triche activée';
                 document.getElementById('cheatButton').style.background = 'linear-gradient(45deg, #f39c12, #e67e22)';
                 
-                // Afficher un message de confirmation
-                alert(`Triche activée ! Vous obtiendrez la carte ${cheatCard} après ${cheatCounter} tours.`);
+                // Mettre à jour l'info de triche
+                document.querySelector('.cheat-info').textContent = `Carte ${cheatCard} garantie après ${cheatCounter} tours`;
             }
         }
 
@@ -1136,6 +1136,9 @@
             if (cheatActive && cheatCounter > 0) {
                 cheatCounter--;
                 document.getElementById('cheatCounter').textContent = `Tours restants: ${cheatCounter}`;
+                
+                // Mettre à jour l'info de triche
+                document.querySelector('.cheat-info').textContent = `Carte ${cheatCard} garantie après ${cheatCounter} tours`;
                 
                 // Si le compteur atteint 0, activer la triche
                 if (cheatCounter === 0) {
@@ -1155,6 +1158,7 @@
             document.getElementById('cheatButton').textContent = 'Activer la triche';
             document.getElementById('cheatButton').style.background = 'linear-gradient(45deg, #10ac84, #1dd1a1)';
             document.getElementById('cheatCounter').textContent = 'Tours restants: 100';
+            document.querySelector('.cheat-info').textContent = 'Choisissez une carte qui sera garantie après 100 tours';
             
             // Désélectionner toutes les cartes
             document.querySelectorAll('.cheat-card-option').forEach(option => {
