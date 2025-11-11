@@ -131,6 +131,33 @@
             color: #feca57;
         }
 
+        /* Affichage du dernier alignement */
+        .last-alignment-display {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .last-alignment-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .last-alignment-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
         .boosters {
             display: flex;
             justify-content: center;
@@ -143,13 +170,20 @@
             background: rgba(0, 0, 0, 0.7);
             border-radius: 15px;
             padding: 25px;
-            min-width: 200px;
             text-align: center;
             backdrop-filter: blur(10px);
             border: 3px solid rgba(255,255,255,0.3);
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
             position: relative;
+        }
+
+        .booster.bronze {
+            min-width: 200px;
+        }
+
+        .booster.silver, .booster.gold {
+            min-width: 160px;
         }
 
         .booster::before {
@@ -747,6 +781,12 @@
                 <div class="drop-pool-value" id="dropPoolValue">0 pièces</div>
                 <div class="drop-pool-info" id="dropPoolInfo">Chance de 1/5000 de gagner des pièces</div>
             </div>
+            <!-- Affichage du dernier alignement -->
+            <div class="last-alignment-display">
+                <h3>DERNIER ALIGNEMENT</h3>
+                <div class="last-alignment-value" id="lastAlignmentValue">Aucun</div>
+                <div class="last-alignment-info" id="lastAlignmentInfo">Prochain carré garanti dans 500 tirages</div>
+            </div>
         </div>
 
         <div class="boosters">
@@ -829,6 +869,12 @@
         let dropPool = 0; // Nombre de pièces dans le pool de drop
         let dropCounter = 0; // Compteur pour ajouter des pièces au pool tous les 10 tours
 
+        // Variables pour le système d'alignement automatique
+        let alignmentCounter = 0; // Compteur pour l'alignement automatique
+        const alignmentThreshold = 500; // Seuil d'alignement (tous les 500 tours)
+        const alignmentCards = [11, 21, 18, 16, 15, 2, 14]; // Cartes qui peuvent s'aligner
+        let lastAlignmentCard = null; // Dernière carte alignée
+
         let attempts = 0;
         let wins = 0;
         let quantities = {
@@ -845,6 +891,19 @@
                 document.getElementById('dropPoolInfo').textContent = `Chance de 1/5000 de gagner ${dropPool} pièces`;
             } else {
                 document.getElementById('dropPoolInfo').textContent = `Chance de 1/5000 de gagner des pièces`;
+            }
+        }
+
+        // Fonction pour mettre à jour l'affichage du dernier alignement
+        function updateLastAlignmentDisplay() {
+            const remaining = alignmentThreshold - alignmentCounter;
+            
+            if (lastAlignmentCard) {
+                document.getElementById('lastAlignmentValue').textContent = `Carte ${lastAlignmentCard}`;
+                document.getElementById('lastAlignmentInfo').textContent = `Prochain carré garanti dans ${remaining} tirages`;
+            } else {
+                document.getElementById('lastAlignmentValue').textContent = `Aucun`;
+                document.getElementById('lastAlignmentInfo').textContent = `Prochain carré garanti dans ${remaining} tirages`;
             }
         }
 
@@ -906,6 +965,28 @@
             }, 5000);
         }
 
+        // Fonction pour gérer l'alignement automatique
+        function handleAlignmentSystem() {
+            // Incrémenter le compteur d'alignement
+            alignmentCounter++;
+            updateLastAlignmentDisplay();
+            
+            // Vérifier si on a atteint le seuil d'alignement
+            if (alignmentCounter >= alignmentThreshold) {
+                // Réinitialiser le compteur
+                alignmentCounter = 0;
+                
+                // Choisir une carte au hasard parmi celles qui peuvent s'aligner
+                lastAlignmentCard = alignmentCards[Math.floor(Math.random() * alignmentCards.length)];
+                updateLastAlignmentDisplay();
+                
+                // Retourner la carte alignée
+                return lastAlignmentCard;
+            }
+            
+            return null;
+        }
+
         function selectQuantity(btn, boosterType, quantity) {
             const parent = btn.parentElement;
             parent.querySelectorAll('.quantity-btn').forEach(b => b.classList.remove('active'));
@@ -919,6 +1000,10 @@
             
             // Vérifier si on doit forcer un carré selon la probabilité du booster
             const forceQuad = Math.random() < quadChance;
+            
+            // Vérifier si une carte doit s'aligner automatiquement
+            const alignmentCard = handleAlignmentSystem();
+            let hasAlignment = false;
             
             if (forceQuad) {
                 // Forcer un carré (4 cartes identiques)
@@ -936,7 +1021,24 @@
                 }
                 
                 // Mélanger les cartes
-                return shuffleArray(cards);
+                return { cards: shuffleArray(cards), alignment: null };
+            } else if (alignmentCard) {
+                // Une carte s'aligne automatiquement
+                hasAlignment = true;
+                
+                // Ajouter 4 cartes identiques (la carte alignée)
+                for (let i = 0; i < 4; i++) {
+                    cards.push(alignmentCard);
+                }
+                
+                // Ajouter le reste des cartes aléatoirement
+                for (let i = 4; i < count; i++) {
+                    const cardNum = Math.floor(Math.random() * TOTAL_CARD_TYPES) + 1;
+                    cards.push(cardNum);
+                }
+                
+                // Mélanger les cartes
+                return { cards: shuffleArray(cards), alignment: alignmentCard };
             } else {
                 // Tirage normal - très peu de chance d'obtenir un carré naturellement
                 for (let i = 0; i < count; i++) {
@@ -952,7 +1054,7 @@
                     return drawCards(count, boosterType);
                 }
                 
-                return cards;
+                return { cards, alignment: null };
             }
         }
 
@@ -990,21 +1092,24 @@
                 // Gérer le système de drop
                 const dropWon = handleDropSystem();
                 
-                const cards = drawCards(cardCount, boosterType);
+                const result = drawCards(cardCount, boosterType);
+                const cards = result.cards;
+                const alignmentCard = result.alignment;
                 const quadCard = checkForQuad(cards);
                 
-                if (quadCard) {
+                if (quadCard || alignmentCard) {
                     wins++;
                 }
                 
                 updateStats();
-                // Passer l'information du drop à l'affichage
-                displaySingleDraw(cards, quadCard, boosterName, dropWon);
+                // Passer l'information du drop et de l'alignement à l'affichage
+                displaySingleDraw(cards, quadCard, boosterName, dropWon, alignmentCard);
             } else {
                 // Tirages multiples - affiche tous les tirages
                 let totalWins = 0;
                 let allDraws = [];
                 let dropWon = false;
+                let alignmentWon = false;
                 
                 for (let i = 0; i < quantity; i++) {
                     attempts++;
@@ -1014,30 +1119,40 @@
                         dropWon = handleDropSystem();
                     }
                     
-                    const cards = drawCards(cardCount, boosterType);
+                    const result = drawCards(cardCount, boosterType);
+                    const cards = result.cards;
+                    const alignmentCard = result.alignment;
                     const quadCard = checkForQuad(cards);
                     
-                    if (quadCard) {
+                    if (quadCard || alignmentCard) {
                         wins++;
                         totalWins++;
                     }
                     
-                    allDraws.push({ cards, quadCard });
+                    allDraws.push({ cards, quadCard, alignmentCard });
+                    
+                    // Marquer si un alignement a eu lieu
+                    if (alignmentCard) {
+                        alignmentWon = true;
+                    }
                 }
                 
                 updateStats();
-                // Passer l'information du drop à l'affichage
-                displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon);
+                // Passer l'information du drop et de l'alignement à l'affichage
+                displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon, alignmentWon);
             }
         }
 
-        function displaySingleDraw(cards, quadCard, boosterName, dropWon) {
+        function displaySingleDraw(cards, quadCard, boosterName, dropWon, alignmentCard) {
             const container = document.getElementById('cardsContainer');
             const resultMessage = document.getElementById('resultMessage');
             container.innerHTML = '';
 
             if (quadCard) {
                 resultMessage.textContent = `CARRÉ GAGNÉ !`;
+                resultMessage.className = 'result-message win';
+            } else if (alignmentCard) {
+                resultMessage.textContent = `ALIGNEMENT AUTOMATIQUE !`;
                 resultMessage.className = 'result-message win';
             } else if (dropWon) {
                 resultMessage.textContent = `DROP GAGNÉ !`;
@@ -1056,7 +1171,7 @@
                 setTimeout(() => {
                     const cardDiv = document.createElement('div');
                     cardDiv.className = 'card';
-                    if (quadCard === cardNum) {
+                    if (quadCard === cardNum || alignmentCard === cardNum) {
                         cardDiv.classList.add('is-quad');
                     }
                     
@@ -1071,7 +1186,7 @@
             document.getElementById('cardsReveal').classList.add('active');
         }
 
-        function displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon) {
+        function displayMultipleDraws(quantity, totalWins, allDraws, boosterName, dropWon, alignmentWon) {
             const container = document.getElementById('cardsContainer');
             const resultMessage = document.getElementById('resultMessage');
             container.innerHTML = '';
@@ -1081,6 +1196,9 @@
                 resultMessage.className = 'result-message win';
             } else if (dropWon) {
                 resultMessage.textContent = `DROP GAGNÉ sur ${quantity} tirages !`;
+                resultMessage.className = 'result-message win';
+            } else if (alignmentWon) {
+                resultMessage.textContent = `ALIGNEMENT AUTOMATIQUE sur ${quantity} tirages !`;
                 resultMessage.className = 'result-message win';
             } else {
                 resultMessage.textContent = `Pas de carré sur ${quantity} tirages...`;
@@ -1115,6 +1233,7 @@
                     📈 Réussite: <strong>${((totalWins / quantity) * 100).toFixed(6)}%</strong>
                 </div>
                 ${dropWon ? '<div style="color: #f39c12;">💰 DROP: <strong>GAGNÉ</strong></div>' : ''}
+                ${alignmentWon ? '<div style="color: #9b59b6;">✨ ALIGNEMENT: <strong>GAGNÉ</strong></div>' : ''}
             `;
             
             container.appendChild(summaryDiv);
@@ -1135,7 +1254,7 @@
                         background: rgba(0, 0, 0, 0.6);
                         padding: 20px;
                         border-radius: 15px;
-                        border: 2px solid ${draw.quadCard ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'};
+                        border: 2px solid ${draw.quadCard || draw.alignmentCard ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'};
                         backdrop-filter: blur(5px);
                     `;
 
@@ -1144,10 +1263,18 @@
                         font-size: 1.3em;
                         font-weight: bold;
                         margin-bottom: 15px;
-                        color: ${draw.quadCard ? '#ffd700' : '#fff'};
+                        color: ${draw.quadCard || draw.alignmentCard ? '#ffd700' : '#fff'};
                         text-align: center;
                     `;
-                    drawTitle.textContent = draw.quadCard ? `🏆 Tirage #${drawIndex + 1} - CARRÉ !` : `Tirage #${drawIndex + 1}`;
+                    
+                    let titleText = `Tirage #${drawIndex + 1}`;
+                    if (draw.quadCard) {
+                        titleText = `🏆 Tirage #${drawIndex + 1} - CARRÉ !`;
+                    } else if (draw.alignmentCard) {
+                        titleText = `✨ Tirage #${drawIndex + 1} - ALIGNEMENT AUTOMATIQUE !`;
+                    }
+                    
+                    drawTitle.textContent = titleText;
                     drawDiv.appendChild(drawTitle);
 
                     const cardsRow = document.createElement('div');
@@ -1167,7 +1294,7 @@
                         setTimeout(() => {
                             const cardDiv = document.createElement('div');
                             cardDiv.className = 'card';
-                            if (draw.quadCard === cardNum) {
+                            if (draw.quadCard === cardNum || draw.alignmentCard === cardNum) {
                                 cardDiv.classList.add('is-quad');
                             }
                             
@@ -1216,8 +1343,9 @@
             }
         }
 
-        // Initialiser l'affichage du pool de drop
+        // Initialiser l'affichage du pool de drop et du dernier alignement
         updateDropPoolDisplay();
+        updateLastAlignmentDisplay();
         updateStats();
         displayAllCards();
     </script>
